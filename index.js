@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 const app = express();
 
@@ -28,14 +28,21 @@ async function run() {
     const productCollection = client.db('motoCrossDB').collection('products')
 
     app.get('/product', async(req,res)=>{
-      const product = req.body;
-      const result = await productCollection.find(product).toArray();
+      const result = await productCollection.find().toArray();
       res.send(result);
     })
 
+    app.get('/product/:id', async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await productCollection.findOne(query);
+      res.send(result);
+    })
+
+    
+
     app.post('/product', async (req,res)=>{
         const newProduct = req.body;
-        console.log(newProduct);
         const result = await productCollection.insertOne(newProduct);
         res.send(result);
     })
