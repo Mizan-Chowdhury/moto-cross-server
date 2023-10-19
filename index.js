@@ -39,12 +39,6 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/product", async (req, res) => {
-      const newProduct = req.body;
-      const result = await productCollection.insertOne(newProduct);
-      res.send(result);
-    });
-
     app.put("/product/:id", async (req, res) => {
       const id = req.params.id;
       const product = req.body;
@@ -64,11 +58,18 @@ async function run() {
       res.send(result);
     });
 
+    app.post("/product", async (req, res) => {
+      const newProduct = req.body;
+      const result = await productCollection.insertOne(newProduct);
+      res.send(result);
+    });
+
+
     app.get("/cart", async (req, res) => {
       const result = await cartCollection.find().toArray();
       res.send(result);
     });
-    
+
     app.delete("/cart/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
