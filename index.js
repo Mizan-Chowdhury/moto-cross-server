@@ -68,6 +68,14 @@ async function run() {
       const result = await cartCollection.find().toArray();
       res.send(result);
     });
+    
+    app.delete("/cart/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await cartCollection.deleteOne(query);
+      res.send(result);
+    });
 
     app.post("/cart", async (req, res) => {
       const cartProduct = req.body;
@@ -76,13 +84,6 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/cart/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id);
-      const query = { _id: new ObjectId(id) };
-      const result = await cartCollection.deleteOne(query);
-      res.send(result);
-    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
