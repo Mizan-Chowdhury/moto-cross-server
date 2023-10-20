@@ -42,8 +42,8 @@ async function run() {
     app.put("/product/:id", async (req, res) => {
       const id = req.params.id;
       const product = req.body;
-      const option = { upsert: true };
       const filter = { _id : new ObjectId(id) };
+      const option = { upsert: true };
       const updatedProduct = {
         $set : {
             photo : product.photo,
@@ -69,7 +69,14 @@ async function run() {
       const result = await cartCollection.find().toArray();
       res.send(result);
     });
-
+    
+    app.post("/cart", async (req, res) => {
+      const cartProduct = req.body;
+      console.log(cartProduct);
+      const result = await cartCollection.insertOne(cartProduct);
+      res.send(result);
+    });
+    
     app.delete("/cart/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
@@ -78,12 +85,6 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/cart", async (req, res) => {
-      const cartProduct = req.body;
-      console.log(cartProduct);
-      const result = await cartCollection.insertOne(cartProduct);
-      res.send(result);
-    });
 
 
     // Send a ping to confirm a successful connection
