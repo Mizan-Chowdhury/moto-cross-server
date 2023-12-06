@@ -12,8 +12,8 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://moto-cross-cb.web.app",
-      "https://moto-cross-cb.firebaseapp.com",
+      "https://motocross.web.app",
+      "https://motocross.firebaseapp.com",
     ],
     credentials: true,
     optionsSuccessStatus: 200,
@@ -23,27 +23,12 @@ app.use(express.json());
 app.use(cookieParsar());
 
 // custom middleware
-// const verifyToken = (req, res, next) => {
-//   const token = req.cookies.token;
-//   console.log("this is from verify middleware", token);
-//   if (!token) {
-//     return res.status(401).send({ message: "token nai to" });
-//   }
-//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-//     if (err) {
-//       return res.status(401).send({ message: "token nai to" });
-//     }
-//     req.user = decoded;
-//     next();
-//   });
-// };
-
 const verifyToken = (req, res, next) => {
   const token = req.cookies.token;
   if (!token) {
     return res.status(401).send({ error: "unAuthorized" });
   }
-  jwt.verify(token, process.env.SECRET_TOKEN, (err, decoded) => {
+  jwt.verify(token, process.env.MOTO_CROSS_SECRET_TOKEN, (err, decoded) => {
     if (err) {
       return res.status(401).send({ error: "unAuthorized" });
     }
@@ -52,7 +37,7 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.qzinma9.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.MOTO_CROSS_DB_USER}:${process.env.MOTO_CROSS_DB_PASS}@cluster0.qzinma9.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -72,7 +57,7 @@ async function run() {
 
     app.post("/jwt", async (req, res) => {
       const user = req.body;
-      const token = jwt.sign(user, process.env.SECRET_TOKEN, {
+      const token = jwt.sign(user, process.env.MOTO_CROSS_SECRET_TOKEN, {
         expiresIn: "10h",
       });
       res
@@ -89,8 +74,10 @@ async function run() {
       res.clearCookie("token", { maxAge: 0 }).send({ success: true });
     });
 
-    app.get("/product", async (req, res) => {
-      const result = await productCollection.find().toArray();
+    app.get("/products", async (req, res) => {
+      const brandName = req.query.brand;
+      const query = {brand: brandName}
+      const result = await productCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -110,6 +97,7 @@ async function run() {
         .toArray();
       res.send(result);
     });
+
 
     app.get("/product/:id", async (req, res) => {
       const id = req.params.id;
@@ -149,8 +137,8 @@ async function run() {
 
     app.get("/cart/:user", verifyToken, async (req, res) => {
       const user = req?.params?.user;
-      console.log(req.user);
-      if (req?.user !== user) {
+      console.log(user, "from 155");
+      if (req?.user.email !== user) {
         return res.status(403).send({ error: "forbidden access" });
       }
       const query = { currentUser: user };
